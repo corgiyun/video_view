@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>视频展示页面</title>
     <style>
+        #video-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px
+        }
         .video-item {
             /* display: flex; */
             align-items: center;
             margin-bottom: 20px;
+            width: 30%;
+            height: 500px;
         }
 
         .video-item iframe {
@@ -81,9 +88,9 @@
                 div.classList.add('video-item');
                 div.innerHTML = `
                     <a href="${videoUrl}" target="_blank" style="margin-right: 10px;">
-                        <h2>${(page - 1) * rowsPerPage + index + 1}、${title}</h2>
+                        <h4>${(page - 1) * rowsPerPage + index + 1}、${title}</h4>
                     </a>
-                    <iframe src="${productUrl}" style="width: 1000px; height: 1000px;transform-origin: left top; transform: scale(0.535, 0.525)"></iframe>
+                    <iframe src="${productUrl}" style="width: 1000px; height: 1000px;transform-origin: left top; transform: scale(0.335, 0.325)"></iframe>
                     
                 `;
                 videoContainer.appendChild(div);
