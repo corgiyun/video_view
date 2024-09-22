@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频展示页面</title>
+    <style>
+        .video-item {
+            /* display: flex; */
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .video-item iframe {
+            margin-left: 20px;
+            width: 376px;
+            height: 300px; /* 调整为合适大小 */
+            border: none; /* 去掉边框 */
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>视频展示页面</h1>
+
+    <div id="video-container"></div>
+    <div class="pagination" id="pagination"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+
+    <script>
+        // 每页显示的行数
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let jsonData = [];
+
+        // 读取Excel文件
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.xlsx';
+
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                jsonData = XLSX.utils.sheet_to_json(sheet);
+
+                renderPage(currentPage); // 渲染第一页
+                updatePagination(); // 更新分页
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+
+        function renderPage(page) {
+            const videoContainer = document.getElementById('video-container');
+            videoContainer.innerHTML = ''; // 清空容器
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const currentRows = jsonData.slice(start, end);
+
+            currentRows.forEach((row, index) => {
+                const title = row['创意标题'];
+                const productUrl = row['商品链接'];
+                const videoUrl = row['抖音视频链接'];
+
+                const div = document.createElement('div');
+                div.classList.add('video-item');
+                div.innerHTML = `
+                    <a href="${videoUrl}" target="_blank" style="margin-right: 10px;">
+                        <h2>${(page - 1) * rowsPerPage + index + 1}、${title}</h2>
+                    </a>
+                    <iframe src="${productUrl}" style="width: 1000px; height: 1000px;transform-origin: left top; transform: scale(0.535, 0.525)"></iframe>
+                    
+                `;
+                videoContainer.appendChild(div);
+            });
+        }
+
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = ''; // 清空分页
+
+            const totalPages = Math.ceil(jsonData.length / rowsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.onclick = function() {
+                    currentPage = i; // 更新当前页码
+                    renderPage(currentPage); // 渲染当前页
+                    updatePagination(); // 更新分页
+                };
+
+                if (i === currentPage) {
+                    button.style.color = 'red';
+                    button.style.fontWeight = 'bold'; // 高亮当前页
+                }
+
+                pagination.appendChild(button);
+            }
+        }
+
+        function resizeIframe(iframe) {
+            iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px'; // 动态调整高度
+        }
+
+        document.body.appendChild(fileInput);
+    </script>
+</body>
+</html>
